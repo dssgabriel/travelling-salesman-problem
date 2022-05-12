@@ -1,0 +1,4 @@
+number of items = 100
+max item value = 10
+max item weight = 10
+max total weight = 100
