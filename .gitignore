@@ -3,3 +3,4 @@ target/
 
 # Files to ignore
 config.txt
+compile_commands.json
