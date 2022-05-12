@@ -54,6 +54,7 @@ config_t* config_load(char const* filename)
         line += 1;
     }
 
+    fclose(fp);
     return config;
 }
 
