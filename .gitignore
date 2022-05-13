@@ -1,5 +1,6 @@
 # Directories to ignore
 target/
+.cache/
 
 # Files to ignore
 config.txt
