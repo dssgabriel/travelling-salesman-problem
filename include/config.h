@@ -6,13 +6,13 @@
 
 #pragma once
 
+#include "vec.h"
+
 #include <stddef.h>
 
 typedef struct config_t {
-    size_t nb_items;
-    size_t max_item_value;
-    size_t max_item_weight;
-    size_t max_total_weight;
+    size_t nb_nodes;
+    vec_t* adjacency_matrix;
 } config_t;
 
 config_t* config_load(char const* filename);

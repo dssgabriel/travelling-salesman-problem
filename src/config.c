@@ -6,11 +6,16 @@
 
 #include "config.h"
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
-static const uint32_t BUF_LEN = 1024;
+static const uint16_t BUFFER_LEN = 4096;
+
+static inline void* matrix_get(vec_t* matrix, size_t const i, size_t const j)
+{
+    return vec_peek(matrix, i * matrix->len + j);
+}
 
 config_t* config_load(char const* filename)
 {
@@ -18,40 +23,51 @@ config_t* config_load(char const* filename)
         return NULL;
     }
 
-    FILE* fp = fopen(filename, "rb");
+    FILE* fp = fopen(filename, "r");
     if (!fp) {
         return NULL;
     }
 
     config_t* config = malloc(sizeof(config_t));
     if (!config) {
+        fclose(fp);
         return NULL;
     }
 
-    char buffer[BUF_LEN];
-    uint32_t line = 1;
-    size_t read_value = 0;
-    while (fgets(buffer, BUF_LEN, fp)) {
-        // Comments
-        if (buffer[0] == '#') {
-            continue;
-        }
+    char buf[BUFFER_LEN];
+    fgets(buf, BUFFER_LEN, fp);
+    sscanf(buf, "%zu\n", &config->nb_nodes);
+    if (!config->nb_nodes) {
+        fprintf(stderr,
+                "\033[1;31merror:\033[0m %zu is an invalid number of nodes\n",
+                config->nb_nodes);
+        config_destroy(config);
+        fclose(fp);
+        exit(EXIT_FAILURE);
+    }
+    config->adjacency_matrix =
+        vec_with_capacity(config->nb_nodes, sizeof(int64_t));
 
-        // Handle configuration
-        if (sscanf(buffer, "number of items = %zu\n", &read_value) == 1) {
-            config->nb_items = read_value;
-        } else if (sscanf(buffer, "max item value = %zu\n", &read_value) == 1) {
-            config->max_item_value = read_value;
-        } else if (sscanf(buffer, "max item weight = %zu\n", &read_value) == 1) {
-            config->max_item_weight = read_value;
-        } else if (sscanf(buffer, "max total weight = %zu\n", &read_value) == 1) {
-            config->max_total_weight = read_value;
-        } else {
-            printf("error: invalid configuration at line %u: %s\n", line, buffer);
-            config_destroy(config);
-            return NULL;
+    int64_t value;
+    size_t i = 0;
+    while (fgets(buf, BUFFER_LEN, fp)) {
+        int offset = 0;
+        char* scan = buf;
+        for (size_t j = 0; j < config->nb_nodes; j++) {
+            sscanf(scan, "%ld%n", &value, &offset);
+            vec_push(config->adjacency_matrix, &value);
+            scan += offset;
         }
-        line += 1;
+        i++;
+        if (i > config->nb_nodes) {
+            fprintf(stderr,
+                    "\033[1;31merror:\033[0m too many lines in config file\n"
+                    "-> number of nodes is set to %zu and current row is %zu\n",
+                    config->nb_nodes, i);
+            config_destroy(config);
+            fclose(fp);
+            exit(EXIT_FAILURE);
+        }
     }
 
     fclose(fp);
@@ -60,16 +76,26 @@ config_t* config_load(char const* filename)
 
 void config_destroy(config_t* config)
 {
-    free(config);
+    if (config) {
+        if (config->adjacency_matrix) {
+            vec_drop(config->adjacency_matrix);
+        }
+        free(config);
+    }
 }
 
 void config_print(config_t config)
 {
-    printf("Knapsack configuration:\n"
-           "  Number of items:  %zu\n"
-           "  Max item value:   %zu\n"
-           "  Max item weight:  %zu\n"
-           "  Max total weight: %zu\n",
-           config.nb_items, config.max_item_value, config.max_item_weight,
-           config.max_total_weight);
+    printf("Travelling Salesman Problem configuration:\n"
+           "  Number of nodes: %zu\n",
+           config.nb_nodes);
+
+    for (size_t i = 0; i < config.nb_nodes; i++) {
+        printf("  ");
+        for (size_t j = 0; j < config.nb_nodes; j++) {
+            printf("%ld ", *(int64_t*)vec_peek(config.adjacency_matrix,
+                                               i * config.nb_nodes + j));
+        }
+        printf("\n");
+    }
 }
