@@ -12,9 +12,10 @@
 
 static const uint16_t BUFFER_LEN = 4096;
 
-static inline void* matrix_get(vec_t* matrix, size_t const i, size_t const j)
+inline int64_t matrix_get(vec_t* matrix, size_t const n, size_t const i,
+                          size_t const j)
 {
-    return vec_peek(matrix, i * matrix->len + j);
+    return *(int64_t*)(vec_peek(matrix, i * n + j));
 }
 
 config_t* config_load(char const* filename)
@@ -84,17 +85,22 @@ void config_destroy(config_t* config)
     }
 }
 
-void config_print(config_t config)
+void config_print(config_t const* config)
 {
+    if (!config) {
+        return;
+    }
+
     printf("Travelling Salesman Problem configuration:\n"
            "  Number of nodes: %zu\n",
-           config.nb_nodes);
+           config->nb_nodes);
 
-    for (size_t i = 0; i < config.nb_nodes; i++) {
+    printf("  Adjacency matrix:\n");
+    for (size_t i = 0; i < config->nb_nodes; i++) {
         printf("  ");
-        for (size_t j = 0; j < config.nb_nodes; j++) {
-            printf("%ld ", *(int64_t*)vec_peek(config.adjacency_matrix,
-                                               i * config.nb_nodes + j));
+        for (size_t j = 0; j < config->nb_nodes; j++) {
+            printf("%4ld ", matrix_get(config->adjacency_matrix,
+                                      config->nb_nodes, i, j));
         }
         printf("\n");
     }
