@@ -1,3 +1,13 @@
+/**
+ * @file    vec.c
+ * @brief   Generic vector library, written as a personal, open-source project
+ *          during summer 2021.
+ * @author  Gabriel Dos Santos
+ * 
+ * Check the following GitHub repo for the full source code:
+ *   https://github.com/dssgabriel/vec
+ **/
+
 #ifndef VEC_H
 #define VEC_H
 
