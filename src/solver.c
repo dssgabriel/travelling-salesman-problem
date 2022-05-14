@@ -35,6 +35,17 @@ solver_t* solver_init(size_t const nb_nodes)
         exit(EXIT_FAILURE);
     }
 
+    // Allocate vector for optimal path
+    solver->optimal_path =
+        vec_with_value(&initial_path_value, nb_nodes + 1, sizeof(int64_t));
+    if (!solver->optimal_path) {
+        fprintf(
+            stderr,
+            "\033[1;31merror:\033[0m failed to allocate `solver.optimal_path`\n");
+        solver_destroy(solver);
+        exit(EXIT_FAILURE);
+    }
+
     // Starting at vertex #1 so the first vertex visited vertex in `path_taken`
     // is #0
     *(bool*)(vec_peek(solver->visited_nodes, 0)) = true;
@@ -55,6 +66,9 @@ void solver_destroy(solver_t* solver)
         }
         if (solver->path_taken) {
             vec_drop(solver->path_taken);
+        }
+        if (solver->optimal_path) {
+            vec_drop(solver->optimal_path);
         }
         free(solver);
     }
@@ -98,9 +112,8 @@ void solve_branch_and_bound(config_t const* config, solver_t* solver,
 
             // Update final result if current result is better.
             if (final_weight < solver->minimum_cost) {
+                copy_optimal(solver);
                 solver->minimum_cost = final_weight;
-                *(int64_t*)(vec_peek(solver->path_taken, level)) =
-                    *(int64_t*)(vec_peek(solver->path_taken, 0));
             }
         }
         return;
@@ -147,14 +160,12 @@ void solve_branch_and_bound(config_t const* config, solver_t* solver,
 
             // Also reset the visited array
             for (size_t j = 0; j < solver->visited_nodes->len; j++) {
-                *(bool*)(vec_peek(
-                    solver->visited_nodes,
-                    *(size_t*)(vec_peek(solver->path_taken, j)))) = false;
+                *(bool*)(vec_peek(solver->visited_nodes, j)) = false;
             }
-            for (size_t j = 0; j < level; j++) {
+            for (size_t j = 0; j <= level - 1; j++) {
                 *(bool*)(vec_peek(
                     solver->visited_nodes,
-                    *(size_t*)(vec_peek(solver->path_taken, j)))) = true;
+                    *(int64_t*)(vec_peek(solver->path_taken, j)))) = true;
             }
         }
     }
@@ -164,9 +175,9 @@ void solver_print(solver_t const* solver)
 {
     printf("\nMinimum cost: %ld\n", solver->minimum_cost);
     printf("Path taken: ");
-    printf("%ld", *(int64_t*)(vec_peek(solver->path_taken, 0)));
+    printf("%ld", *(int64_t*)(vec_peek(solver->optimal_path, 0)));
     for (size_t i = 1; i <= solver->visited_nodes->len; i++) {
-        printf(" -> %ld", *(int64_t*)(vec_peek(solver->path_taken, i)));
+        printf(" -> %ld", *(int64_t*)(vec_peek(solver->optimal_path, i)));
     }
     printf("\n");
 }

@@ -12,6 +12,7 @@
 typedef struct solver_t {
     vec_t* visited_nodes;
     vec_t* path_taken;
+    vec_t* optimal_path;
     int64_t minimum_cost;
 } solver_t;
 

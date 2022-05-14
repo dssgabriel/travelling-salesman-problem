@@ -29,8 +29,12 @@ int main(int argc, char* argv[argc + 1])
     clock_gettime(CLOCK_MONOTONIC_RAW, &after);
 
     solver_print(solver);
-    printf("Finished in %.3lfs", after.tv_sec - before.tv_sec +
-                                 (after.tv_nsec - before.tv_nsec) / 1e9);
+    double elapsed = after.tv_sec - before.tv_sec + (after.tv_nsec - before.tv_nsec) / 1e9;
+    if (elapsed < 0.001) {
+        printf("Finished in %.3lfµs\n", elapsed * 1000000);
+    } else {
+        printf("Finished in %.3lfs\n", elapsed);
+    }
 
     solver_destroy(solver);
     config_destroy(config);

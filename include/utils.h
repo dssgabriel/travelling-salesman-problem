@@ -8,6 +8,7 @@
 #pragma once
 
 #include "config.h"
+#include "solver.h"
 #include "vec.h"
 
 /**
@@ -19,7 +20,7 @@
  * @param i X coordinate.
  * @param j Y coordinate.
  * @return Value at the target address.
- */
+ **/
 int64_t adj_matrix_get(config_t const* config, size_t i, size_t j);
 
 /**
@@ -28,7 +29,8 @@ int64_t adj_matrix_get(config_t const* config, size_t i, size_t j);
  * 
  * @param config Config holding the adjacency matrix.
  * @param i X coordinate.
- */
+ * @return Minimum weight.
+ **/
 int64_t first_min(config_t const* config, size_t i);
 
 /**
@@ -37,5 +39,13 @@ int64_t first_min(config_t const* config, size_t i);
  * 
  * @param config Config holding the adjacency matrix.
  * @param i X coordinate.
- */
+ * @return Second minimum weight.
+ **/
 int64_t second_min(config_t const* config, size_t i);
+
+/**
+ * Copy the path taken to the optimal path.
+ * 
+ * @param solver Solver to copy the optimal path.
+ **/
+void copy_optimal(solver_t* solver);
