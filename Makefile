@@ -5,7 +5,7 @@ OFLAGS=-march=native -mtune=native -O3
 SRC=src
 EXT=ext
 DEPS=target/deps
-TARGET=target/branch_and_bound
+TARGET=target/tsp
 
 .PHONY: build clean
 
@@ -14,7 +14,7 @@ build: $(TARGET)
 run: $(TARGET)
 	$(TARGET) sample_config.txt
 
-$(TARGET): $(DEPS)/main.o $(DEPS)/vec.o $(DEPS)/config.o
+$(TARGET): $(DEPS)/vec.o $(DEPS)/utils.o $(DEPS)/config.o $(DEPS)/solver.o $(DEPS)/main.o 
 	$(CC) $(CFLAGS) $(OFLAGS) $^ -o $@
 
 $(DEPS)/%.o: $(SRC)/%.c
