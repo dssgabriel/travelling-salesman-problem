@@ -12,7 +12,7 @@ TARGET=target/branch_and_bound
 build: $(TARGET)
 
 run: $(TARGET)
-	$(TARGET)
+	$(TARGET) sample_config.txt
 
 $(TARGET): $(DEPS)/main.o $(DEPS)/vec.o $(DEPS)/config.o
 	$(CC) $(CFLAGS) $(OFLAGS) $^ -o $@
