@@ -5,18 +5,13 @@
  **/
 
 #include "config.h"
+#include "utils.h"
 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 static const uint16_t BUFFER_LEN = 4096;
-
-inline int64_t matrix_get(vec_t* matrix, size_t const n, size_t const i,
-                          size_t const j)
-{
-    return *(int64_t*)(vec_peek(matrix, i * n + j));
-}
 
 config_t* config_load(char const* filename)
 {
@@ -95,13 +90,16 @@ void config_print(config_t const* config)
            "  Number of nodes: %zu\n",
            config->nb_nodes);
 
-    printf("  Adjacency matrix:\n");
-    for (size_t i = 0; i < config->nb_nodes; i++) {
-        printf("  ");
-        for (size_t j = 0; j < config->nb_nodes; j++) {
-            printf("%4ld ", matrix_get(config->adjacency_matrix,
-                                      config->nb_nodes, i, j));
+    if (config->nb_nodes > 16) {
+        printf("  Adjacency matrix is too big to print, sorry!\n");
+    } else {
+        printf("  Adjacency matrix:\n");
+        for (size_t i = 0; i < config->nb_nodes; i++) {
+            printf("  ");
+            for (size_t j = 0; j < config->nb_nodes; j++) {
+                printf("%4ld ", adj_matrix_get(config, i, j));
+            }
+            printf("\n");
         }
-        printf("\n");
     }
 }
